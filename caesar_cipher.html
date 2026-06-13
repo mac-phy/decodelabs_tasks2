@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caesar Cipher — DecodeLabs Project 2</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6f8;
+      color: #1a1a2e;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      color: #555;
+      margin-top: 6px;
+      font-size: 0.95rem;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #1a1a2e;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-top: 8px;
+      letter-spacing: 0.04em;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #dde1e7;
+      border-radius: 12px;
+      padding: 28px 32px;
+      width: 100%;
+      max-width: 680px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 6px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95rem;
+      resize: vertical;
+      min-height: 80px;
+      color: #1a1a2e;
+      background: #fafafa;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus { outline: none; border-color: #1a1a2e; background: #fff; }
+
+    .shift-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .shift-row label { margin: 0; white-space: nowrap; }
+
+    input[type="range"] {
+      flex: 1;
+      accent-color: #1a1a2e;
+    }
+
+    .shift-val {
+      font-size: 1.1rem;
+      font-weight: 700;
+      min-width: 28px;
+      text-align: center;
+      color: #1a1a2e;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    button:active { transform: scale(0.98); }
+
+    .btn-primary { background: #1a1a2e; color: #fff; }
+    .btn-primary:hover { background: #2d2d4e; }
+    .btn-secondary { background: #f0f2f5; color: #444; border: 1px solid #ccc; flex: 0.4; }
+    .btn-secondary:hover { background: #e4e6ea; }
+
+    .output-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .output-box { position: relative; }
+
+    .output-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    .output-text {
+      background: #f4f6f8;
+      border: 1px solid #dde1e7;
+      border-radius: 8px;
+      padding: 14px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      min-height: 60px;
+      word-break: break-all;
+      color: #1a1a2e;
+      line-height: 1.6;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 24px;
+      right: 8px;
+      background: none;
+      border: none;
+      font-size: 0.75rem;
+      color: #888;
+      cursor: pointer;
+      flex: none;
+      padding: 2px 6px;
+    }
+
+    .copy-btn:hover { color: #1a1a2e; }
+
+    .verify {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid #dde1e7;
+      font-size: 0.9rem;
+      color: #444;
+      background: #f9fafb;
+      margin-top: 16px;
+    }
+
+    .verify.pass { border-color: #b7dba7; background: #f0fbe8; color: #2d6a18; }
+
+    .trace-box {
+      background: #f4f6f8;
+      border: 1px solid #dde1e7;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-top: 16px;
+    }
+
+    .trace-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #888;
+      margin-bottom: 10px;
+    }
+
+    .trace-steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .trace-step {
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      background: #fff;
+      border: 1px solid #dde1e7;
+      border-radius: 4px;
+      padding: 3px 8px;
+      color: #555;
+    }
+
+    .concept {
+      font-size: 0.85rem;
+      color: #666;
+      border-left: 3px solid #1a1a2e;
+      padding-left: 12px;
+      line-height: 1.6;
+    }
+
+    .concept strong { color: #1a1a2e; }
+
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #aaa;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 500px) {
+      .output-grid { grid-template-columns: 1fr; }
+      .card { padding: 20px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Caesar Cipher</h1>
+  <p>Basic Encryption &amp; Decryption DecodeLabs Cybersecurity internship</p>
+  <!-- <span class="badge"></span> -->
+</header>
+
+<!-- Input -->
+<div class="card">
+  <h2>Input</h2>
+  <label for="inputText">Message</label>
+  <textarea id="inputText" placeholder="Type your message here...">Hello, DecodeLabs!</textarea>
+
+  <div class="shift-row">
+    <label for="shiftSlider">Shift key (n)</label>
+    <input type="range" id="shiftSlider" min="1" max="25" value="3" oninput="document.getElementById('shiftVal').textContent=this.value; run();">
+    <span class="shift-val" id="shiftVal">3</span>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-primary" onclick="run()">Encrypt &amp; Decrypt</button>
+    <button class="btn-secondary" onclick="clearAll()">↺</button>
+  </div>
+</div>
+
+<!-- Output -->
+<div class="card">
+  <h2>Output</h2>
+  <div class="output-grid">
+    <div class="output-box">
+      <div class="output-label">Encrypted (ciphertext)</div>
+      <button class="copy-btn" onclick="copy('encOut')" title="Copy">⎘</button>
+      <div class="output-text" id="encOut">—</div>
+    </div>
+    <div class="output-box">
+      <div class="output-label">Decrypted (plaintext)</div>
+      <button class="copy-btn" onclick="copy('decOut')" title="Copy">⎘</button>
+      <div class="output-text" id="decOut">—</div>
+    </div>
+  </div>
+
+  <div class="verify" id="verifyRow">
+    <span id="verifyIcon">○</span>
+    <span id="verifyMsg">Run encryption to verify round-trip</span>
+  </div>
+</div>
+
+<!-- Algorithm trace -->
+<div class="card" id="traceCard" style="display:none;">
+  <h2>Algorithm Trace</h2>
+  <p style="font-size:0.85rem;color:#666;margin-bottom:12px;">
+    Step-by-step breakdown of how the first letter is encrypted using the formula
+    <strong>E(x) = (x + n) % 26</strong>
+  </p>
+  <div class="trace-box">
+    <div class="trace-title">First character trace</div>
+    <div id="traceSteps" class="trace-steps"></div>
+  </div>
+</div>
+
+<!-- Concept -->
+<div class="card">
+  <h2>Key Concepts</h2>
+  <p class="concept">
+    <strong>Encryption formula:</strong> E(x) = (ord(char) − base + shift) % 26 + base<br>
+    <strong>Decryption formula:</strong> D(x) = (ord(char) − base − shift) % 26 + base<br>
+    <strong>Why % 26?</strong> The alphabet wraps around — shifting Z by 3 gives C, not a character beyond Z.<br>
+    <strong>Why two bases?</strong> Uppercase A = ASCII 65, lowercase a = ASCII 97. We subtract the base to work in 0–25, apply the shift, then add the base back.<br>
+    <strong>Weakness:</strong> Only 25 possible keys — an attacker can brute-force all shifts in seconds. Caesar cipher demonstrates the concept of symmetric encryption but is not used in real security systems.
+  </p>
+</div>
+
+<footer> DecodeLabs Cybersecurity internship 2026</footer>
+
+<script>
+  function caesar(text, shift, mode) {
+    let result = '';
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (c >= 'A' && c <= 'Z') {
+        result += String.fromCharCode(((c.charCodeAt(0) - 65 + (mode === 'enc' ? shift : 26 - shift)) % 26) + 65);
+      } else if (c >= 'a' && c <= 'z') {
+        result += String.fromCharCode(((c.charCodeAt(0) - 97 + (mode === 'enc' ? shift : 26 - shift)) % 26) + 97);
+      } else {
+        result += c;
+      }
+    }
+    return result;
+  }
+
+  function run() {
+    const text  = document.getElementById('inputText').value;
+    const shift = parseInt(document.getElementById('shiftSlider').value);
+    if (!text.trim()) return;
+
+    const enc = caesar(text, shift, 'enc');
+    const dec = caesar(enc,  shift, 'dec');
+
+    document.getElementById('encOut').textContent = enc;
+    document.getElementById('decOut').textContent = dec;
+
+    const pass = dec === text;
+    const vRow = document.getElementById('verifyRow');
+    vRow.className = 'verify' + (pass ? ' pass' : '');
+    document.getElementById('verifyIcon').textContent = pass ? '✓' : '✗';
+    document.getElementById('verifyMsg').textContent  = pass
+      ? 'Verification passed — decryption matches original (symmetric encryption confirmed)'
+      : 'Verification failed';
+
+    // Trace first letter
+    let firstChar = null;
+    for (const c of text) {
+      if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) { firstChar = c; break; }
+    }
+    if (firstChar) {
+      const isUpper = firstChar >= 'A' && firstChar <= 'Z';
+      const base    = isUpper ? 65 : 97;
+      const ascii   = firstChar.charCodeAt(0);
+      const pos     = ascii - base;
+      const shifted = (pos + shift) % 26;
+      const result  = String.fromCharCode(shifted + base);
+      const steps   = [
+        `char: '${firstChar}'`,
+        `ord: ${ascii}`,
+        `− base(${base}): ${pos}`,
+        `+ shift(${shift}): ${pos + shift}`,
+        `% 26: ${shifted}`,
+        `+ base(${base}): ${shifted + base}`,
+        `result: '${result}'`,
+      ];
+      document.getElementById('traceSteps').innerHTML =
+        steps.map(s => `<span class="trace-step">${s}</span>`).join('');
+      document.getElementById('traceCard').style.display = 'block';
+    }
+  }
+
+  function clearAll() {
+    document.getElementById('inputText').value = '';
+    document.getElementById('encOut').textContent = '—';
+    document.getElementById('decOut').textContent = '—';
+    document.getElementById('verifyRow').className = 'verify';
+    document.getElementById('verifyIcon').textContent = '○';
+    document.getElementById('verifyMsg').textContent = 'Run encryption to verify round-trip';
+    document.getElementById('traceCard').style.display = 'none';
+  }
+
+  function copy(id) {
+    const text = document.getElementById(id).textContent;
+    if (text && text !== '—') navigator.clipboard.writeText(text).catch(() => {});
+  }
+
+  document.getElementById('inputText').addEventListener('input', run);
+  run();
+</script>
+</body>
+</html>
